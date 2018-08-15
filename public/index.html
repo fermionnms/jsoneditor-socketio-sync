@@ -1,0 +1,76 @@
+<head>
+  <link href="/jsoneditor.css" rel="stylesheet" type="text/css">
+  <script src="/jsoneditor.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io();
+  </script>
+</head>
+<body>
+DEMO Implementation of <a href="https://github.com/josdejong/jsoneditor">JSON Editor</a> synchronization with Socket.IO Rooms<br>
+<br>
+Room ID : <input type="text" id="room"><br>
+<button onClick="connectToRoom();">Connect</button>
+<div id="connected_to"></div>
+
+<div id="jsoneditor1"></div>
+<script>
+  //create editor 1
+  var editor1 = new JSONEditor(document.getElementById('jsoneditor1'), {
+    onChangeText: function (jsonString) {
+      updateRoom(jsonString);
+    }
+  });
+
+  //set initial data
+  var json = {
+    'array': [1, 2, 3],
+    'boolean': true,
+    'null': null,
+    'number': 123,
+    'object': {'a': 'b', 'c': 'd'},
+    'string': 'Hello World'
+  };
+  editor1.set(json);
+
+  //generate a random room id to start
+  var room = guid();
+  var connected = false;//marker for knowing when we are connected
+  document.getElementById('room').value = room;
+
+  function guid() {
+    function s4() {
+      return Math.floor((1 + Math.random()) * 0x10000)
+        .toString(16)
+        .substring(1);
+    }
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+  }
+
+  document.getElementById('room').value;
+
+  function connectToRoom(){
+    room = document.getElementById('room').value;
+    socket.emit('join_room',room);
+    connected = true;
+    document.getElementById('connected_to').innerHTML = room;
+  }
+
+  function updateRoom(msg){
+    socket.emit('editor_update',room,msg);
+  }
+
+  socket.on('editor_update',function(msg){
+    //console.log(msg);
+    editor1.updateText(msg);
+  });
+
+  //rejoin on reconnect
+  socket.on('reconnect',function(){
+    if(connected){
+      connectToRoom();
+    }
+  });
+
+</script>
+</body>
