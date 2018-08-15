@@ -1,5 +1,5 @@
 {
-  "name": "jsoneditor-collab-service",
+  "name": "jsoneditor-socketio-sync",
   "version": "0.1.0",
   "description": "Allows synchronization of JSONEditor instances",
   "main": "app.js",
